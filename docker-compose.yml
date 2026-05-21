@@ -1,0 +1,8 @@
+services:
+  chatgpt-devlog-telegram-bridge:
+    build: .
+    container_name: chatgpt-devlog-telegram-bridge
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
