@@ -6,8 +6,9 @@ services:
       - .env
     expose:
       - "8000"
+    extra_hosts:
+      - "api.telegram.org:149.154.167.220"
     restart: unless-stopped
-
   caddy:
     image: caddy:2-alpine
     container_name: caddy

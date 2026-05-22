@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Header, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.config import BRIDGE_SECRET_TOKEN
 from app.telegram_sender import send_telegram_message
@@ -8,26 +8,44 @@ from app.telegram_sender import send_telegram_message
 app = FastAPI(
     title="ChatGPT DevLog Telegram Bridge",
     description="Service for publishing project progress posts from ChatGPT to Telegram",
-    version="1.0.0"
+    version="1.1.0",
 )
 
 
 class DevLogPost(BaseModel):
-    text: str
+    title: str
+    content: str
+    tags: list[str] = Field(default_factory=list)
+
+
+def format_devlog_post(post: DevLogPost) -> str:
+    tags = []
+
+    for tag in post.tags:
+        clean_tag = tag.strip().replace(" ", "_").replace("#", "")
+        if clean_tag:
+            tags.append(f"#{clean_tag}")
+
+    tags_block = ""
+
+    if tags:
+        tags_block = "\n\n" + " ".join(tags)
+
+    return f"🚀 {post.title}\n\n{post.content}{tags_block}"
 
 
 @app.get("/")
 def health_check():
     return {
         "status": "ok",
-        "service": "ChatGPT DevLog Telegram Bridge"
+        "service": "ChatGPT DevLog Telegram Bridge",
     }
 
 
 @app.post("/publish-devlog")
 def publish_devlog(
     post: DevLogPost,
-    x_bridge_token: str = Header(default="", alias="x-bridge-token")
+    x_bridge_token: str = Header(default="", alias="x-bridge-token"),
 ):
     expected_token = (BRIDGE_SECRET_TOKEN or "").strip()
     received_token = (x_bridge_token or "").strip()
@@ -35,19 +53,20 @@ def publish_devlog(
     if not expected_token:
         raise HTTPException(
             status_code=500,
-            detail="Bridge secret token is not configured"
+            detail="Bridge secret token is not configured",
         )
 
     if received_token != expected_token:
         raise HTTPException(
             status_code=401,
-            detail="Invalid bridge token"
+            detail="Invalid bridge token",
         )
 
-    telegram_result = send_telegram_message(post.text)
+    formatted_text = format_devlog_post(post)
+    telegram_result = send_telegram_message(formatted_text)
 
     return {
         "status": "ok",
-        "post_preview": post.text,
-        "telegram": telegram_result
+        "post_preview": formatted_text,
+        "telegram": telegram_result,
     }
