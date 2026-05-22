@@ -1,54 +1,84 @@
 # ChatGPT DevLog Telegram Bridge
 
-Backend-сервис для публикации devlog-постов из ChatGPT в Telegram-канал.
+Сервис для публикации devlog-постов из ChatGPT в Telegram-канал.
 
-Проект принимает готовый текст поста через защищённый API endpoint, проверяет секретный токен и отправляет сообщение в Telegram через Telegram Bot API.
+Проект принимает структурированный HTTP-запрос с заголовком, текстом и тегами, форматирует его в читаемый пост и отправляет сообщение через Telegram Bot API.  
+Основная цель проекта — автоматизировать публикацию заметок о ходе разработки и использовать сервис как небольшой production-ready backend-проект для практики DevOps, Docker, FastAPI и деплоя на VPS.
 
 ---
 
-## Описание проекта
+## О проекте
 
-ChatGPT DevLog Telegram Bridge создан как небольшой automation-сервис для ведения дневника разработки.
+`ChatGPT DevLog Telegram Bridge` — это небольшой backend-сервис, который работает как мост между внешним клиентом и Telegram-каналом.
 
-Основная идея проекта:
+Сценарий использования:
 
-```text
-ChatGPT формирует пост о выполненной работе
-        ↓
-backend принимает текст поста
-        ↓
-backend проверяет секретный токен
-        ↓
-Telegram-бот публикует пост в канал
-```
+1. Пользователь отправляет POST-запрос на API.
+2. Сервис проверяет секретный токен в заголовке.
+3. Получает данные devlog-поста: заголовок, содержание и теги.
+4. Форматирует текст в единый стиль.
+5. Отправляет готовое сообщение в Telegram-канал.
 
-Проект можно использовать для автоматизации публикаций о прогрессе разработки, учебных задачах, pet-проектах и DevOps-практике.
+Проект развёрнут на VPS и доступен через домен с HTTPS.
 
 ---
 
 ## Возможности
 
-- приём POST-запросов через FastAPI
-- защищённый endpoint для публикации постов
-- проверка секретного токена через header
-- отправка сообщений в Telegram-канал
-- настройка через `.env`
-- безопасное хранение токенов вне GitHub
-- поддержка Telegram Bot API
-- подготовка к будущей интеграции с ChatGPT Actions
+- FastAPI backend
+- Endpoint для публикации devlog-постов
+- Проверка доступа через `x-bridge-token`
+- Поддержка структурированного формата поста:
+  - `title`
+  - `content`
+  - `tags`
+- Автоматическое форматирование сообщения для Telegram
+- Интеграция с Telegram Bot API
+- Docker-контейнеризация
+- Запуск через Docker Compose
+- Reverse proxy через Caddy
+- HTTPS через автоматические TLS-сертификаты
+- Деплой на VPS
+- Swagger-документация API
 
 ---
 
-## Статус проекта
+## Технологии
 
-✅ FastAPI backend создан  
-✅ Endpoint `/publish-devlog` работает  
-✅ Проверка secret token реализована  
-✅ Telegram Bot подключён  
-✅ Первый пост успешно опубликован в Telegram  
-✅ Проект загружен на GitHub  
+- Python
+- FastAPI
+- Pydantic
+- Requests
+- Telegram Bot API
+- Docker
+- Docker Compose
+- Caddy
+- Ubuntu VPS
+- Git / GitHub
+- SSH deploy workflow
 
-Текущая версия проекта работает локально.
+---
+
+## Архитектура
+
+Общий принцип работы:
+
+```text
+Client / Swagger
+        ↓
+HTTPS request
+        ↓
+Caddy reverse proxy
+        ↓
+FastAPI container
+        ↓
+Telegram Bot API
+        ↓
+Telegram channel
+```
+
+В production-окружении приложение работает в Docker-контейнере.  
+Caddy принимает внешние HTTP/HTTPS-запросы и проксирует их во внутренний FastAPI-сервис на порт `8000`.
 
 ---
 
@@ -56,146 +86,137 @@ Telegram-бот публикует пост в канал
 
 ```text
 chatgpt-devlog-telegram-bridge/
-│
 ├── app/
-│   ├── __init__.py
 │   ├── main.py
 │   ├── config.py
 │   └── telegram_sender.py
-│
-├── logs/
-│
+├── Dockerfile
+├── docker-compose.yml
+├── Caddyfile
+├── requirements.txt
 ├── .env.example
 ├── .gitignore
-├── requirements.txt
 └── README.md
-```
-
----
-
-## Как работает проект
-
-### 1. ChatGPT или другой клиент отправляет POST-запрос
-
-Запрос отправляется на endpoint:
-
-```text
-POST /publish-devlog
-```
-
-В теле запроса передаётся текст поста:
-
-```json
-{
-  "text": "День 29. Проект \"ChatGPT DevLog Telegram Bridge\"..."
-}
-```
-
----
-
-### 2. Backend проверяет secret token
-
-Для защиты endpoint используется header:
-
-```text
-x-bridge-token
-```
-
-Если токен неправильный, сервис возвращает ошибку:
-
-```text
-401 Invalid bridge token
-```
-
----
-
-### 3. Backend отправляет сообщение в Telegram
-
-После успешной проверки сервис вызывает Telegram Bot API и публикует сообщение в указанный Telegram-канал.
-
----
-
-## Используемые технологии
-
-- Python
-- FastAPI
-- Uvicorn
-- python-dotenv
-- requests
-- Telegram Bot API
-- Git
-- GitHub
-
----
-
-## Установка и запуск
-
-### 1. Клонировать репозиторий
-
-```bash
-git clone https://github.com/keregan/chatgpt-devlog-telegram-bridge.git
-cd chatgpt-devlog-telegram-bridge
-```
-
----
-
-### 2. Установить зависимости
-
-```bash
-python -m pip install -r requirements.txt
-```
-
----
-
-### 3. Создать `.env`
-
-Создайте файл `.env` в корне проекта.
-
-Пример содержимого:
-
-```env
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-TELEGRAM_CHAT_ID=@your_telegram_channel
-BRIDGE_SECRET_TOKEN=your_secret_token
 ```
 
 ---
 
 ## Переменные окружения
 
-| Переменная | Описание |
+Для работы проекта нужен файл `.env`.
+
+Пример:
+
+```env
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_channel_id
+BRIDGE_SECRET_TOKEN=your_secret_bridge_token
+```
+
+Описание переменных:
+
+| Переменная | Назначение |
 |---|---|
-| `TELEGRAM_BOT_TOKEN` | Токен Telegram-бота, полученный через BotFather |
-| `TELEGRAM_CHAT_ID` | Username Telegram-канала или chat id |
-| `BRIDGE_SECRET_TOKEN` | Секретный токен для защиты API endpoint |
+| `TELEGRAM_BOT_TOKEN` | Токен Telegram-бота |
+| `TELEGRAM_CHAT_ID` | ID Telegram-канала или чата |
+| `BRIDGE_SECRET_TOKEN` | Секретный токен для защиты API |
 
 Файл `.env` не должен попадать в GitHub.
 
 ---
 
-## Запуск сервера
+## Запуск локально
+
+### 1. Клонировать репозиторий
 
 ```bash
-python -m uvicorn app.main:app --reload
+git clone git@github.com:keregan/chatgpt-devlog-telegram-bridge.git
+cd chatgpt-devlog-telegram-bridge
 ```
 
-После запуска сервер будет доступен по адресу:
+### 2. Создать виртуальное окружение
+
+```bash
+python -m venv .venv
+```
+
+### 3. Активировать окружение
+
+Для Linux/macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Для Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### 4. Установить зависимости
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Создать `.env`
+
+```bash
+cp .env.example .env
+```
+
+После этого нужно заполнить значения переменных окружения.
+
+### 6. Запустить приложение
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Локальная документация API будет доступна по адресу:
 
 ```text
-http://127.0.0.1:8000
+http://127.0.0.1:8000/docs
 ```
 
 ---
 
-## Проверка работы сервера
+## Запуск через Docker Compose
 
-Откройте в браузере:
-
-```text
-http://127.0.0.1:8000
+```bash
+docker compose up -d --build
 ```
 
-Ожидаемый ответ:
+Проверить контейнеры:
+
+```bash
+docker compose ps
+```
+
+Посмотреть логи:
+
+```bash
+docker compose logs --tail=100
+```
+
+Остановить проект:
+
+```bash
+docker compose down
+```
+
+---
+
+## API
+
+### Health Check
+
+```http
+GET /
+```
+
+Пример ответа:
 
 ```json
 {
@@ -206,156 +227,172 @@ http://127.0.0.1:8000
 
 ---
 
-## Документация API
+### Publish DevLog
 
-FastAPI автоматически создаёт документацию:
-
-```text
-http://127.0.0.1:8000/docs
+```http
+POST /publish-devlog
 ```
 
-Через эту страницу можно проверить endpoint `/publish-devlog`.
+Заголовок:
 
----
-
-## Пример отправки поста через PowerShell
-
-```powershell
-$headers = @{
-    "x-bridge-token" = "test123"
-}
-
-$bodyObject = @{
-    text = "День 29. Проект `"ChatGPT DevLog Telegram Bridge`"`n`nПодключаю Telegram-бота к backend-сервису для публикации devlog-постов.`n`n- backend принимает защищённые запросы`n- добавлена отправка сообщений в Telegram`n- проект начинает превращаться в связку ChatGPT → Telegram`n`nhttps://github.com/keregan/chatgpt-devlog-telegram-bridge"
-}
-
-$json = $bodyObject | ConvertTo-Json -Depth 10
-$utf8Body = [System.Text.Encoding]::UTF8.GetBytes($json)
-
-$response = Invoke-RestMethod `
-    -Uri "http://127.0.0.1:8000/publish-devlog" `
-    -Method Post `
-    -Headers $headers `
-    -Body $utf8Body `
-    -ContentType "application/json; charset=utf-8"
-
-$response | ConvertTo-Json -Depth 10
+```http
+x-bridge-token: your_secret_bridge_token
 ```
 
----
-
-## Пример успешного ответа
+Тело запроса:
 
 ```json
 {
-  "status": "ok",
-  "post_preview": "День 29. Проект \"ChatGPT DevLog Telegram Bridge\"...",
-  "telegram": {
-    "status": "sent",
-    "message": "Message sent to Telegram"
-  }
+  "title": "Deployment complete",
+  "content": "Проект успешно развернут на VPS через Docker, Caddy и HTTPS.",
+  "tags": ["DevOps", "Docker", "FastAPI", "Telegram"]
 }
+```
+
+Пример результата в Telegram:
+
+```text
+🚀 Deployment complete
+
+Проект успешно развернут на VPS через Docker, Caddy и HTTPS.
+
+#DevOps #Docker #FastAPI #Telegram
+```
+
+---
+
+## Production deployment
+
+Проект развёрнут на VPS и доступен через HTTPS:
+
+```text
+https://devlog.kereg.ru/docs
+```
+
+Production stack:
+
+- Ubuntu VPS
+- Docker
+- Docker Compose
+- FastAPI
+- Telegram Bot API
+- Caddy reverse proxy
+- HTTPS
+
+---
+
+## Caddy
+
+Caddy используется как reverse proxy.
+
+Пример `Caddyfile`:
+
+```caddy
+devlog.kereg.ru {
+    reverse_proxy chatgpt-devlog-telegram-bridge:8000
+}
+```
+
+Caddy принимает внешние запросы на домен `devlog.kereg.ru` и перенаправляет их во внутренний FastAPI-контейнер.
+
+---
+
+## Docker Compose
+
+В production используются два сервиса:
+
+- `chatgpt-devlog-telegram-bridge` — FastAPI backend
+- `caddy` — reverse proxy и HTTPS
+
+Пример запуска:
+
+```bash
+docker compose up -d --build
 ```
 
 ---
 
 ## Безопасность
 
-В проекте используется простой secret token для защиты endpoint.
+В проекте используется простой механизм защиты API через заголовок:
 
-Запрос должен содержать header:
-
-```text
-x-bridge-token: your_secret_token
+```http
+x-bridge-token
 ```
 
-Без правильного токена публикация невозможна.
+Если токен не передан или передан неверно, API возвращает ошибку `401 Unauthorized`.
 
 Важно:
 
-- не хранить реальные токены в коде
-- не публиковать `.env` в GitHub
-- использовать `.env.example` только как шаблон
-- давать Telegram-боту только необходимые права
+- не хранить реальные токены в репозитории;
+- не отправлять `.env` в GitHub;
+- при случайной публикации токена — заменить его;
+- для GitHub использовать SSH-ключи вместо постоянного ввода токена.
 
 ---
 
-## Telegram-настройка
+## Git workflow
 
-Для работы проекта нужно:
+Основные команды для работы с изменениями:
 
-1. Создать бота через `@BotFather`
-2. Получить Telegram Bot Token
-3. Добавить бота администратором в Telegram-канал
-4. Выдать боту право публиковать сообщения
-5. Указать token и channel username в `.env`
+```bash
+git status
+git add app/main.py docker-compose.yml README.md
+git commit -m "feat: update devlog bridge"
+git push origin main
+```
 
-Пример:
+Для подключения к GitHub используется SSH:
 
-```env
-TELEGRAM_CHAT_ID=@my_channel
+```bash
+git@github.com:keregan/chatgpt-devlog-telegram-bridge.git
 ```
 
 ---
 
-## Текущие ограничения
+## Текущий статус проекта
 
-На текущем этапе проект работает локально.
+Проект находится в рабочем состоянии.
 
-Адрес:
+Реализовано:
 
-```text
-http://127.0.0.1:8000
-```
-
-Такой адрес доступен только на локальном компьютере.
-
-Для полноценной интеграции с ChatGPT Actions в будущем потребуется внешний HTTPS-адрес.
+- backend на FastAPI;
+- публикация devlog-постов в Telegram;
+- защита endpoint через секретный токен;
+- поддержка структурированных постов;
+- Docker-сборка;
+- Docker Compose;
+- деплой на VPS;
+- домен;
+- HTTPS;
+- reverse proxy через Caddy;
+- push на GitHub через SSH.
 
 ---
 
 ## Планы по развитию
 
-Планируемые улучшения:
+Возможные следующие улучшения:
 
-- добавить Dockerfile
-- добавить Docker Compose
-- добавить `openapi.yaml` для ChatGPT Actions
-- подключить внешний HTTPS endpoint
-- добавить preview-режим перед публикацией
-- добавить логирование публикаций
-- добавить историю отправленных постов
-- добавить шаблоны постов
-- добавить интеграцию с Git commit messages
-
----
-
-## Цель проекта
-
-Проект создаётся как практический backend/DevOps automation tool.
-
-Он показывает навыки:
-
-- создания REST API
-- работы с FastAPI
-- интеграции с внешним API
-- безопасной работы с токенами
-- настройки `.env`
-- автоматизации публикаций
-- подготовки сервиса к контейнеризации и дальнейшему deployment
+- добавить логирование успешных и неуспешных отправок;
+- сделать более понятные ответы при ошибках Telegram API;
+- добавить retry-механику при временной недоступности Telegram;
+- добавить шаблоны постов;
+- добавить поддержку нескольких Telegram-каналов;
+- добавить endpoint для предпросмотра поста без отправки;
+- добавить GitHub Actions для проверки проекта;
+- добавить тесты для форматирования devlog-постов.
 
 ---
 
-## Версия
+## Автор
 
-Текущая версия:
+Проект создан как практический DevOps/backend-проект для изучения:
 
-```text
-v1.0 local
-```
-
-Основная локальная связка работает:
-
-```text
-FastAPI backend → Telegram Bot → Telegram Channel
-```
+- FastAPI;
+- Docker;
+- деплоя на VPS;
+- reverse proxy;
+- HTTPS;
+- интеграции с внешними API;
+- GitHub workflow.
