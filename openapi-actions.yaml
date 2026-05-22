@@ -1,0 +1,118 @@
+openapi: 3.1.0
+
+info:
+  title: ChatGPT DevLog Telegram Bridge
+  description: API for previewing and publishing structured devlog posts from ChatGPT to a Telegram channel.
+  version: 1.0.0
+
+servers:
+  - url: https://devlog.kereg.ru
+    description: Production server
+
+paths:
+  /preview-devlog:
+    post:
+      operationId: previewDevlog
+      summary: Preview a formatted devlog post
+      description: Creates a formatted devlog post preview without sending it to Telegram.
+      security:
+        - BridgeTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DevLogPost"
+      responses:
+        "200":
+          description: Devlog post preview created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewDevlogResponse"
+        "401":
+          description: Invalid bridge token
+        "500":
+          description: Bridge token is not configured
+
+  /publish-devlog:
+    post:
+      operationId: publishDevlog
+      summary: Publish a devlog post to Telegram
+      description: Formats a structured devlog post and sends it to the connected Telegram channel.
+      security:
+        - BridgeTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DevLogPost"
+      responses:
+        "200":
+          description: Devlog post published successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublishDevlogResponse"
+        "401":
+          description: Invalid bridge token
+        "502":
+          description: Telegram message was not delivered
+        "500":
+          description: Bridge token is not configured
+
+components:
+  securitySchemes:
+    BridgeTokenAuth:
+      type: apiKey
+      in: header
+      name: x-bridge-token
+
+  schemas:
+    DevLogPost:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          description: Short title of the devlog post.
+          example: "CI and tests added"
+        content:
+          type: string
+          description: Main content of the devlog post.
+          example: "Added GitHub Actions CI and formatting tests for devlog posts."
+        tags:
+          type: array
+          description: List of tags for the post. Tags will be converted to Telegram hashtags.
+          items:
+            type: string
+          example:
+            - DevOps
+            - FastAPI
+            - Telegram
+
+    PreviewDevlogResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        post_preview:
+          type: string
+          example: "🚀 CI and tests added\n\nAdded GitHub Actions CI and formatting tests.\n\n#DevOps #FastAPI"
+
+    PublishDevlogResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        post_preview:
+          type: string
+          example: "🚀 CI and tests added\n\nAdded GitHub Actions CI and formatting tests.\n\n#DevOps #FastAPI"
+        telegram:
+          type: object
+          description: Raw Telegram API delivery result.
