@@ -1,0 +1,16 @@
+[0;1;31m×[0m docker.service - Docker Application Container Engine
+     Loaded: loaded (]8;;file://v3132016.hosted-by-vdsina.ru/usr/lib/systemd/system/docker.service/usr/lib/systemd/system/docker.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;31mfailed[0m (Result: exit-code) since Thu 2026-05-21 22:22:19 MSK; 6min ago
+   Duration: 1min 7.059s
+TriggeredBy: [0;1;31m×[0m docker.socket
+       Docs: ]8;;https://docs.docker.comhttps://docs.docker.com]8;;
+    Process: 13986 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock [0;1;31m(code=exited, status=1/FAILURE)[0m
+   Main PID: 13986 (code=exited, status=1/FAILURE)
+        CPU: 38ms
+
+May 21 22:22:17 v3132016.hosted-by-vdsina.ru systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdocker.service: Failed with result 'exit-code'.[0m
+May 21 22:22:17 v3132016.hosted-by-vdsina.ru systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start docker.service - Docker Application Container Engine.[0m
+May 21 22:22:19 v3132016.hosted-by-vdsina.ru systemd[1]: docker.service: Scheduled restart job, restart counter is at 3.
+May 21 22:22:19 v3132016.hosted-by-vdsina.ru systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdocker.service: Start request repeated too quickly.[0m
+May 21 22:22:19 v3132016.hosted-by-vdsina.ru systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdocker.service: Failed with result 'exit-code'.[0m
+May 21 22:22:19 v3132016.hosted-by-vdsina.ru systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start docker.service - Docker Application Container Engine.[0m

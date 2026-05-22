@@ -1,0 +1,3 @@
+devlog.kereg.ru {
+    reverse_proxy chatgpt-devlog-telegram-bridge:8000
+}
