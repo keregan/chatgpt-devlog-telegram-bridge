@@ -1,3 +1,3 @@
-devlog.kereg.ru {
+your-domain.example {
     reverse_proxy chatgpt-devlog-telegram-bridge:8000
 }

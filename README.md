@@ -32,7 +32,7 @@ Custom GPT
    ↓
 GPT Action
    ↓
-https://devlog.kereg.ru
+https://your-domain.example
    ↓
 Caddy reverse proxy
    ↓
@@ -301,7 +301,7 @@ docker compose down
 Production-версия развёрнута на VPS и доступна через HTTPS:
 
 ```text
-https://devlog.kereg.ru/docs
+https://your-domain.example/docs
 ```
 
 В production используется:
@@ -323,7 +323,7 @@ Caddy используется как reverse proxy и принимает вне
 Пример `Caddyfile`:
 
 ```caddy
-devlog.kereg.ru {
+your-domain.example {
     reverse_proxy chatgpt-devlog-telegram-bridge:8000
 }
 ```
@@ -844,7 +844,7 @@ x-bridge-token: your_secret_bridge_token
 Проект развёрнут на VPS и доступен через HTTPS:
 
 ```text
-https://devlog.kereg.ru/docs
+https://your-domain.example/docs
 ```
 
 Production stack:
@@ -866,12 +866,12 @@ Caddy используется как reverse proxy.
 Пример `Caddyfile`:
 
 ```caddy
-devlog.kereg.ru {
+your-domain.example {
     reverse_proxy chatgpt-devlog-telegram-bridge:8000
 }
 ```
 
-Caddy принимает внешние запросы на домен `devlog.kereg.ru` и перенаправляет их во внутренний FastAPI-контейнер.
+Caddy принимает внешние запросы на домен `your-domain.example` и перенаправляет их во внутренний FastAPI-контейнер.
 
 ---
 
