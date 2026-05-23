@@ -1,14 +1,22 @@
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# Python
 __pycache__/
 *.pyc
-logs/
-.venv/
-venv/
-.env
-.venv/
-__pycache__/
-*.pyc
-*.backup
 .pytest_cache/
-Caddyfile.local
+
+# Virtual environments
+venv/
+env/
+
+# Logs
+logs/
+
+# Local and backup files
 *.bak
+*.backup
+*.local
+Caddyfile.local
