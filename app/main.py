@@ -11,6 +11,12 @@ app = FastAPI(
     version="1.3.0",
 )
 
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "service": "chatgpt-devlog-telegram-bridge"
+    }
 
 class DevLogPost(BaseModel):
     title: str
